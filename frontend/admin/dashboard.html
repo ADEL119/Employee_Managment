@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord - Admin | GRH System</title>
+    <meta name="description"
+        content="Tableau de bord administrateur pour la gestion des employés, congés et heures de travail.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="bg-blobs">
+        <div class="blob"></div>
+        <div class="blob"></div>
+        <div class="blob"></div>
+    </div>
+    <div class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <div class="brand-text">GRH System</div>
+                <div class="brand-sub">Administration</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section-title">Principal</div>
+            <a href="dashboard.html" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i><span>Tableau de
+                    bord</span></a>
+            <a href="employees.html" class="nav-link"><i class="bi bi-people"></i><span>Employés</span></a>
+            <div class="nav-section-title">Gestion</div>
+            <a href="leaves.html" class="nav-link"><i class="bi bi-calendar-check"></i><span>Congés</span></a>
+            <a href="work-hours.html" class="nav-link"><i class="bi bi-clock-history"></i><span>Heures de
+                    travail</span></a>
+            <a href="reports.html" class="nav-link"><i class="bi bi-bar-chart-line"></i><span>Rapports</span></a>
+        </nav>
+        <div class="sidebar-user">
+            <div class="user-avatar">AD</div>
+            <div class="user-info">
+                <div class="user-name">Admin</div>
+                <div class="user-role">Administrateur</div>
+            </div>
+            <button onclick="logout()" class="btn btn-link text-muted p-0 ms-auto" title="Déconnexion"><i
+                    class="bi bi-box-arrow-right"></i></button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="top-navbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="sidebar-toggle"><i class="bi bi-list"></i></button>
+                <h1 class="page-title">Tableau de <span>bord</span></h1>
+            </div>
+            <div class="navbar-actions">
+                <button class="btn-icon" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge-dot"></span>
+                </button>
+                <button class="btn-icon" title="Paramètres"><i class="bi bi-gear"></i></button>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <!-- Welcome Banner -->
+            <div class="glass-card p-4 mb-4 slide-up">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Bienvenue, Admin 👋</h4>
+                        <p class="text-secondary mb-0">Voici un résumé de l'activité d'aujourd'hui.</p>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-semibold" style="color: var(--accent);" id="dashDate"></div>
+                        <small class="text-muted" id="dashTime"></small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-xl-3 col-sm-6">
+                    <div class="glass-card stat-card slide-up" style="animation-delay: 0.1s">
+                        <div class="stat-icon primary"><i class="bi bi-people-fill"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Employés</div>
+                            <div class="stat-value" id="statEmployees">0</div>
+                            <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> 2 ce mois</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="glass-card stat-card slide-up" style="animation-delay: 0.15s">
+                        <div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Congés en attente</div>
+                            <div class="stat-value" id="statPending">0</div>
+                            <div class="stat-change">Nécessite votre attention</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="glass-card stat-card slide-up" style="animation-delay: 0.2s">
+                        <div class="stat-icon success"><i class="bi bi-clock-fill"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Présents aujourd'hui</div>
+                            <div class="stat-value" id="statPresent">0</div>
+                            <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> Bonne présence</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="glass-card stat-card slide-up" style="animation-delay: 0.25s">
+                        <div class="stat-icon info"><i class="bi bi-graph-up-arrow"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Heures ce mois</div>
+                            <div class="stat-value" id="statHours">0</div>
+                            <div class="stat-change">heures totales</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tables Row -->
+            <div class="row g-4">
+                <!-- Recent Leave Requests -->
+                <div class="col-lg-7">
+                    <div class="glass-card data-table-wrapper slide-up" style="animation-delay: 0.3s">
+                        <div class="data-table-header">
+                            <h5><i class="bi bi-calendar-check me-2" style="color: var(--accent);"></i>Dernières
+                                demandes de congé</h5>
+                            <a href="leaves.html" class="btn btn-outline-custom btn-sm">Voir tout <i
+                                    class="bi bi-arrow-right ms-1"></i></a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-dark-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Employé</th>
+                                        <th>Type</th>
+                                        <th>Période</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentLeaves"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Attendance -->
+                <div class="col-lg-5">
+                    <div class="glass-card data-table-wrapper slide-up" style="animation-delay: 0.35s">
+                        <div class="data-table-header">
+                            <h5><i class="bi bi-clock me-2" style="color: var(--success);"></i>Présence aujourd'hui</h5>
+                            <a href="work-hours.html" class="btn btn-outline-custom btn-sm">Détails <i
+                                    class="bi bi-arrow-right ms-1"></i></a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-dark-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Employé</th>
+                                        <th>Entrée</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="todayAttendance"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        const user = requireAuth('admin');
+        if (user) {
+            // Stats
+            document.getElementById('statEmployees').textContent = DemoData.employees.length;
+            document.getElementById('statPending').textContent = DemoData.leaves.filter(l => l.status === 'pending').length;
+            const todayLogs = DemoData.workHours.filter(w => w.date === '2026-02-14');
+            document.getElementById('statPresent').textContent = todayLogs.length;
+            const totalHours = DemoData.workHours.reduce((s, w) => s + (w.hours || 0), 0);
+            document.getElementById('statHours').textContent = totalHours.toFixed(1);
+
+            // Date/Time
+            startClock(document.getElementById('dashTime'), document.getElementById('dashDate'));
+
+            // Recent Leaves
+            const leavesHtml = DemoData.leaves.slice(0, 4).map(l => `
+        <tr>
+          <td>
+            <div class="employee-cell">
+              <div class="emp-avatar">${getInitials(l.employeeName)}</div>
+              <div><div class="emp-name">${l.employeeName}</div></div>
+            </div>
+          </td>
+          <td>${l.type}</td>
+          <td>${formatDate(l.startDate)} - ${formatDate(l.endDate)}</td>
+          <td>${getStatusBadge(l.status)}</td>
+        </tr>
+      `).join('');
+            document.getElementById('recentLeaves').innerHTML = leavesHtml;
+
+            // Today Attendance
+            const attHtml = todayLogs.map(w => `
+        <tr>
+          <td>
+            <div class="employee-cell">
+              <div class="emp-avatar">${getInitials(w.employeeName)}</div>
+              <div class="emp-name">${w.employeeName}</div>
+            </div>
+          </td>
+          <td>${w.clockIn}</td>
+          <td>${getStatusBadge(w.status)}</td>
+        </tr>
+      `).join('');
+            document.getElementById('todayAttendance').innerHTML = attHtml;
+        }
+    </script>
+</body>
+
+</html>
