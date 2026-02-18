@@ -52,22 +52,27 @@ $todayAttendance = $todayAttendance->fetchAll();
                 <div class="brand-sub">Administration</div>
             </div>
         </div>
+        
         <nav class="sidebar-nav">
             <div class="nav-section-title">Principal</div>
             <a href="dashboard.php" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i><span>Tableau de bord</span></a>
             <a href="employees.php" class="nav-link"><i class="bi bi-people"></i><span>Employés</span></a>
+            
             <div class="nav-section-title">Gestion</div>
             <a href="leaves.php" class="nav-link"><i class="bi bi-calendar-check"></i><span>Congés</span></a>
             <a href="work-hours.php" class="nav-link"><i class="bi bi-clock-history"></i><span>Heures de travail</span></a>
             <a href="reports.php" class="nav-link"><i class="bi bi-bar-chart-line"></i><span>Rapports</span></a>
         </nav>
+        
         <div class="sidebar-user">
             <div class="user-avatar">AD</div>
             <div class="user-info">
                 <div class="user-name">Admin</div>
                 <div class="user-role">Administrateur</div>
             </div>
-            <a href="../../backend/logout.php" class="btn btn-link text-muted p-0 ms-auto" title="Déconnexion"><i class="bi bi-box-arrow-right"></i></a>
+            <a href="../../backend/logout.php" class="btn btn-link text-muted p-0 ms-auto" title="Déconnexion">
+                <i class="bi bi-box-arrow-right fs-5"></i>
+            </a>
         </div>
     </aside>
 
@@ -76,6 +81,13 @@ $todayAttendance = $todayAttendance->fetchAll();
             <div class="d-flex align-items-center gap-3">
                 <button class="sidebar-toggle"><i class="bi bi-list"></i></button>
                 <h1 class="page-title">Tableau de <span>bord</span></h1>
+            </div>
+            
+            <div class="navbar-actions">
+                <button class="btn-icon" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge-dot"></span>
+                </button>
             </div>
         </div>
 
@@ -196,6 +208,18 @@ $todayAttendance = $todayAttendance->fetchAll();
             </div>
         </div>
     </main>
+
+    <!-- BOUTON DE DÉCONNEXION FLOTTANT - SOLUTION 100% FONCTIONNELLE -->
+    <a href="../../backend/logout.php" 
+       class="btn btn-danger position-fixed" 
+       style="bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; 
+              display: flex; align-items: center; justify-content: center; 
+              background: linear-gradient(135deg, #ef4444, #dc2626);
+              border: none; box-shadow: 0 4px 15px rgba(239,68,68,0.5);
+              z-index: 9999;"
+       title="Déconnexion">
+        <i class="bi bi-box-arrow-right fs-3"></i>
+    </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/app.js"></script>

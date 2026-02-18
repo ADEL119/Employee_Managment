@@ -239,5 +239,16 @@ unset($_SESSION['success']);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/app.js"></script>
+    <!-- BOUTON DE DÉCONNEXION FLOTTANT - SOLUTION 100% FONCTIONNELLE -->
+<a href="../../backend/logout.php" 
+   class="btn btn-danger position-fixed" 
+   style="bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; 
+          display: flex; align-items: center; justify-content: center; 
+          background: linear-gradient(135deg, #ef4444, #dc2626);
+          border: none; box-shadow: 0 4px 15px rgba(239,68,68,0.5);
+          z-index: 9999;"
+   title="Déconnexion">
+    <i class="bi bi-box-arrow-right fs-3"></i>
+</a>
 </body>
 </html>

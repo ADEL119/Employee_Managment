@@ -67,7 +67,9 @@ $pointage = $pointage->fetch();
                 <div class="user-name"><?php echo $_SESSION['employee_name']; ?></div>
                 <div class="user-role">Employé</div>
             </div>
-            <a href="../../backend/logout.php" class="btn btn-link text-muted p-0 ms-auto"><i class="bi bi-box-arrow-right"></i></a>
+            <a href="../../backend/logout.php" class="btn btn-link text-muted p-0 ms-auto">
+                <i class="bi bi-box-arrow-right fs-5"></i>
+            </a>
         </div>
     </aside>
 
@@ -76,6 +78,12 @@ $pointage = $pointage->fetch();
             <div class="d-flex align-items-center gap-3">
                 <button class="sidebar-toggle"><i class="bi bi-list"></i></button>
                 <h1 class="page-title">Mon <span>Espace</span></h1>
+            </div>
+            <div class="navbar-actions">
+                <button class="btn-icon" title="Notifications">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge-dot"></span>
+                </button>
             </div>
         </div>
 
@@ -178,6 +186,18 @@ $pointage = $pointage->fetch();
             </div>
         </div>
     </main>
+
+    <!-- BOUTON DE DÉCONNEXION FLOTTANT - SOLUTION 100% FONCTIONNELLE -->
+    <a href="../../backend/logout.php" 
+       class="btn btn-danger position-fixed" 
+       style="bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; 
+              display: flex; align-items: center; justify-content: center; 
+              background: linear-gradient(135deg, #ef4444, #dc2626);
+              border: none; box-shadow: 0 4px 15px rgba(239,68,68,0.5);
+              z-index: 9999;"
+       title="Déconnexion">
+        <i class="bi bi-box-arrow-right fs-3"></i>
+    </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/app.js"></script>
