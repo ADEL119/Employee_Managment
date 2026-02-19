@@ -11,18 +11,10 @@ $stmt = $pdo->prepare("SELECT * FROM employees WHERE id = ?");
 $stmt->execute([$employee_id]);
 $employee = $stmt->fetch();
 
-// Statistiques
-$stats = $pdo->prepare("SELECT 
-    SUM(hours) as total_hours,
-    COUNT(DISTINCT date) as days_worked,
-    AVG(hours) as avg_hours
-    FROM work_hours 
-    WHERE employee_id = ? AND status = 'complete'");
-$stats->execute([$employee_id]);
-$workStats = $stats->fetch();
-
+// Statistiques congés
 $leavesCount = $pdo->prepare("SELECT 
     SUM(CASE WHEN status = 'approved' THEN days ELSE 0 END) as approved_days,
+    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count,
     COUNT(*) as total_requests
     FROM leaves 
     WHERE employee_id = ?");
@@ -59,7 +51,6 @@ $leaveStats = $leavesCount->fetch();
             <div class="nav-section-title">Navigation</div>
             <a href="dashboard.php" class="nav-link"><i class="bi bi-grid-1x2-fill"></i><span>Tableau de bord</span></a>
             <a href="profile.php" class="nav-link active"><i class="bi bi-person-circle"></i><span>Mon Profil</span></a>
-            <a href="work-hours.php" class="nav-link"><i class="bi bi-clock-history"></i><span>Mes Heures</span></a>
             <a href="leaves.php" class="nav-link"><i class="bi bi-calendar-check"></i><span>Mes Congés</span></a>
         </nav>
         <div class="sidebar-user">
@@ -138,32 +129,23 @@ $leaveStats = $leavesCount->fetch();
                         </div>
                     </div>
 
-                    <!-- Statistiques -->
+                    <!-- Statistiques congés -->
                     <div class="row g-4">
-                        <div class="col-sm-4">
-                            <div class="glass-card stat-card slide-up">
-                                <div class="stat-icon success"><i class="bi bi-clock"></i></div>
-                                <div class="stat-info">
-                                    <div class="stat-label">Heures totales</div>
-                                    <div class="stat-value"><?php echo number_format($workStats['total_hours'] ?? 0, 1); ?></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="glass-card stat-card slide-up">
-                                <div class="stat-icon warning"><i class="bi bi-calendar-event"></i></div>
-                                <div class="stat-info">
-                                    <div class="stat-label">Jours travaillés</div>
-                                    <div class="stat-value"><?php echo $workStats['days_worked'] ?? 0; ?></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-6">
                             <div class="glass-card stat-card slide-up">
                                 <div class="stat-icon primary"><i class="bi bi-calendar-check"></i></div>
                                 <div class="stat-info">
-                                    <div class="stat-label">Congés pris</div>
+                                    <div class="stat-label">Jours de congé pris</div>
                                     <div class="stat-value"><?php echo $leaveStats['approved_days'] ?? 0; ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="glass-card stat-card slide-up">
+                                <div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div>
+                                <div class="stat-info">
+                                    <div class="stat-label">Demandes en attente</div>
+                                    <div class="stat-value"><?php echo $leaveStats['pending_count'] ?? 0; ?></div>
                                 </div>
                             </div>
                         </div>

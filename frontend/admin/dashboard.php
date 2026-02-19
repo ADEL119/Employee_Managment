@@ -7,24 +7,13 @@ requireAdmin();
 // Statistiques
 $totalEmployes = $pdo->query("SELECT COUNT(*) FROM employees")->fetchColumn();
 $congesEnAttente = $pdo->query("SELECT COUNT(*) FROM leaves WHERE status = 'pending'")->fetchColumn();
-$presentAujourdhui = $pdo->prepare("SELECT COUNT(*) FROM work_hours WHERE date = ?");
-$presentAujourdhui->execute([date('Y-m-d')]);
-$presentAujourdhui = $presentAujourdhui->fetchColumn();
-$heuresTotales = $pdo->query("SELECT SUM(hours) FROM work_hours WHERE status = 'complete'")->fetchColumn() ?: 0;
+$totalCongesApprouves = $pdo->query("SELECT COUNT(*) FROM leaves WHERE status = 'approved'")->fetchColumn();
 
 // Dernières demandes de congé
 $recentLeaves = $pdo->query("SELECT l.*, e.name as employee_name 
                              FROM leaves l 
                              JOIN employees e ON l.employee_id = e.id 
-                             ORDER BY l.created_at DESC LIMIT 4")->fetchAll();
-
-// Présence aujourd'hui
-$todayAttendance = $pdo->prepare("SELECT w.*, e.name as employee_name 
-                                  FROM work_hours w 
-                                  JOIN employees e ON w.employee_id = e.id 
-                                  WHERE w.date = ?");
-$todayAttendance->execute([date('Y-m-d')]);
-$todayAttendance = $todayAttendance->fetchAll();
+                             ORDER BY l.created_at DESC LIMIT 6")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -60,8 +49,6 @@ $todayAttendance = $todayAttendance->fetchAll();
             
             <div class="nav-section-title">Gestion</div>
             <a href="leaves.php" class="nav-link"><i class="bi bi-calendar-check"></i><span>Congés</span></a>
-            <a href="work-hours.php" class="nav-link"><i class="bi bi-clock-history"></i><span>Heures de travail</span></a>
-            <a href="reports.php" class="nav-link"><i class="bi bi-bar-chart-line"></i><span>Rapports</span></a>
         </nav>
         
         <div class="sidebar-user">
@@ -106,7 +93,7 @@ $todayAttendance = $todayAttendance->fetchAll();
             </div>
 
             <div class="row g-4 mb-4">
-                <div class="col-xl-3 col-sm-6">
+                <div class="col-md-4">
                     <div class="glass-card stat-card slide-up">
                         <div class="stat-icon primary"><i class="bi bi-people-fill"></i></div>
                         <div class="stat-info">
@@ -115,7 +102,7 @@ $todayAttendance = $todayAttendance->fetchAll();
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-sm-6">
+                <div class="col-md-4">
                     <div class="glass-card stat-card slide-up">
                         <div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div>
                         <div class="stat-info">
@@ -124,92 +111,51 @@ $todayAttendance = $todayAttendance->fetchAll();
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-sm-6">
+                <div class="col-md-4">
                     <div class="glass-card stat-card slide-up">
-                        <div class="stat-icon success"><i class="bi bi-clock-fill"></i></div>
+                        <div class="stat-icon success"><i class="bi bi-calendar-check-fill"></i></div>
                         <div class="stat-info">
-                            <div class="stat-label">Présents aujourd'hui</div>
-                            <div class="stat-value"><?php echo $presentAujourdhui; ?></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-sm-6">
-                    <div class="glass-card stat-card slide-up">
-                        <div class="stat-icon info"><i class="bi bi-graph-up-arrow"></i></div>
-                        <div class="stat-info">
-                            <div class="stat-label">Heures totales</div>
-                            <div class="stat-value"><?php echo number_format($heuresTotales, 1); ?></div>
+                            <div class="stat-label">Congés approuvés</div>
+                            <div class="stat-value"><?php echo $totalCongesApprouves; ?></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-lg-7">
-                    <div class="glass-card data-table-wrapper slide-up">
-                        <div class="data-table-header">
-                            <h5><i class="bi bi-calendar-check me-2" style="color: var(--accent);"></i>Dernières demandes de congé</h5>
-                            <a href="leaves.php" class="btn btn-outline-custom btn-sm">Voir tout</a>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table-dark-custom">
-                                <thead>
-                                    <tr><th>Employé</th><th>Type</th><th>Période</th><th>Statut</th></tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($recentLeaves as $leave): ?>
-                                    <tr>
-                                        <td>
-                                            <div class="employee-cell">
-                                                <div class="emp-avatar"><?php echo getInitials($leave['employee_name']); ?></div>
-                                                <div><?php echo $leave['employee_name']; ?></div>
-                                            </div>
-                                        </td>
-                                        <td><?php echo $leave['type']; ?></td>
-                                        <td><?php echo formatDate($leave['start_date']); ?> - <?php echo formatDate($leave['end_date']); ?></td>
-                                        <td><?php echo getStatusBadge($leave['status']); ?></td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <div class="glass-card data-table-wrapper slide-up">
+                <div class="data-table-header">
+                    <h5><i class="bi bi-calendar-check me-2" style="color: var(--accent);"></i>Dernières demandes de congé</h5>
+                    <a href="leaves.php" class="btn btn-outline-custom btn-sm">Voir tout</a>
                 </div>
-
-                <div class="col-lg-5">
-                    <div class="glass-card data-table-wrapper slide-up">
-                        <div class="data-table-header">
-                            <h5><i class="bi bi-clock me-2" style="color: var(--success);"></i>Présence aujourd'hui</h5>
-                            <a href="work-hours.php" class="btn btn-outline-custom btn-sm">Détails</a>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table-dark-custom">
-                                <thead>
-                                    <tr><th>Employé</th><th>Entrée</th><th>Statut</th></tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($todayAttendance as $att): ?>
-                                    <tr>
-                                        <td>
-                                            <div class="employee-cell">
-                                                <div class="emp-avatar"><?php echo getInitials($att['employee_name']); ?></div>
-                                                <div><?php echo $att['employee_name']; ?></div>
-                                            </div>
-                                        </td>
-                                        <td><?php echo $att['clock_in']; ?></td>
-                                        <td><?php echo getStatusBadge($att['status']); ?></td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table-dark-custom">
+                        <thead>
+                            <tr><th>Employé</th><th>Type</th><th>Période</th><th>Jours</th><th>Statut</th></tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($recentLeaves as $leave): ?>
+                            <tr>
+                                <td>
+                                    <div class="employee-cell">
+                                        <div class="emp-avatar"><?php echo getInitials($leave['employee_name']); ?></div>
+                                        <div><?php echo $leave['employee_name']; ?></div>
+                                    </div>
+                                </td>
+                                <td><?php echo $leave['type']; ?></td>
+                                <td><?php echo formatDate($leave['start_date']); ?> - <?php echo formatDate($leave['end_date']); ?></td>
+                                <td><?php echo $leave['days']; ?> j</td>
+                                <td><?php echo getStatusBadge($leave['status']); ?></td>
+                            </tr>
+                            <?php
+endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- BOUTON DE DÉCONNEXION FLOTTANT - SOLUTION 100% FONCTIONNELLE -->
+    <!-- BOUTON DE DÉCONNEXION FLOTTANT -->
     <a href="../../backend/logout.php" 
        class="btn btn-danger position-fixed" 
        style="bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; 

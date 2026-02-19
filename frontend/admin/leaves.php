@@ -8,14 +8,14 @@ requireAdmin();
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = $_GET['id'];
     $action = $_GET['action'];
-    
+
     if ($action === 'approve' || $action === 'reject') {
         $status = ($action === 'approve') ? 'approved' : 'rejected';
         $stmt = $pdo->prepare("UPDATE leaves SET status = ? WHERE id = ?");
         $stmt->execute([$status, $id]);
         $_SESSION['success'] = "Demande " . ($action === 'approve' ? 'approuvée' : 'refusée') . " avec succès";
     }
-    
+
     header('Location: leaves.php');
     exit();
 }
@@ -93,8 +93,6 @@ unset($_SESSION['success']);
             <a href="employees.php" class="nav-link"><i class="bi bi-people"></i><span>Employés</span></a>
             <div class="nav-section-title">Gestion</div>
             <a href="leaves.php" class="nav-link active"><i class="bi bi-calendar-check"></i><span>Congés</span></a>
-            <a href="work-hours.php" class="nav-link"><i class="bi bi-clock-history"></i><span>Heures de travail</span></a>
-            <a href="reports.php" class="nav-link"><i class="bi bi-bar-chart-line"></i><span>Rapports</span></a>
         </nav>
         <div class="sidebar-user">
             <div class="user-avatar">AD</div>
@@ -120,7 +118,8 @@ unset($_SESSION['success']);
                 <?php echo $success; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <?php endif; ?>
+            <?php
+endif; ?>
 
             <!-- Stats -->
             <div class="row g-4 mb-4">
@@ -172,7 +171,8 @@ unset($_SESSION['success']);
                                 <option value="<?php echo $t['type']; ?>" <?php echo $typeFilter === $t['type'] ? 'selected' : ''; ?>>
                                     <?php echo $t['type']; ?>
                                 </option>
-                                <?php endforeach; ?>
+                                <?php
+endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -219,13 +219,16 @@ unset($_SESSION['success']);
                                             <a href="?action=reject&id=<?php echo $leave['id']; ?>" class="btn-action danger" title="Refuser" onclick="return confirm('Refuser cette demande ?')">
                                                 <i class="bi bi-x-lg"></i>
                                             </a>
-                                        <?php else: ?>
+                                        <?php
+    else: ?>
                                             <span class="text-muted">—</span>
-                                        <?php endif; ?>
+                                        <?php
+    endif; ?>
                                     </div>
                                 </td>
                             </tr>
-                            <?php endforeach; ?>
+                            <?php
+endforeach; ?>
                         </tbody>
                     </table>
                 </div>

@@ -6,27 +6,23 @@ requireEmploye();
 
 $employee_id = $_SESSION['employee_id'];
 
-// Statistiques de l'employé
-$heures = $pdo->prepare("SELECT SUM(hours) as total, COUNT(*) as jours 
-                         FROM work_hours 
-                         WHERE employee_id = ? AND status = 'complete'");
-$heures->execute([$employee_id]);
-$stats = $heures->fetch();
-
+// Statistiques congés
 $congesEnAttente = $pdo->prepare("SELECT COUNT(*) FROM leaves WHERE employee_id = ? AND status = 'pending'");
 $congesEnAttente->execute([$employee_id]);
 $congesEnAttente = $congesEnAttente->fetchColumn();
 
+$congesApprouves = $pdo->prepare("SELECT COUNT(*) FROM leaves WHERE employee_id = ? AND status = 'approved'");
+$congesApprouves->execute([$employee_id]);
+$congesApprouves = $congesApprouves->fetchColumn();
+
+$totalConges = $pdo->prepare("SELECT COUNT(*) FROM leaves WHERE employee_id = ?");
+$totalConges->execute([$employee_id]);
+$totalConges = $totalConges->fetchColumn();
+
 // Derniers congés
-$mesConges = $pdo->prepare("SELECT * FROM leaves WHERE employee_id = ? ORDER BY created_at DESC LIMIT 4");
+$mesConges = $pdo->prepare("SELECT * FROM leaves WHERE employee_id = ? ORDER BY created_at DESC LIMIT 6");
 $mesConges->execute([$employee_id]);
 $mesConges = $mesConges->fetchAll();
-
-// Pointage aujourd'hui
-$today = date('Y-m-d');
-$pointage = $pdo->prepare("SELECT * FROM work_hours WHERE employee_id = ? AND date = ?");
-$pointage->execute([$employee_id, $today]);
-$pointage = $pointage->fetch();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -58,7 +54,6 @@ $pointage = $pointage->fetch();
             <div class="nav-section-title">Navigation</div>
             <a href="dashboard.php" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i><span>Tableau de bord</span></a>
             <a href="profile.php" class="nav-link"><i class="bi bi-person-circle"></i><span>Mon Profil</span></a>
-            <a href="work-hours.php" class="nav-link"><i class="bi bi-clock-history"></i><span>Mes Heures</span></a>
             <a href="leaves.php" class="nav-link"><i class="bi bi-calendar-check"></i><span>Mes Congés</span></a>
         </nav>
         <div class="sidebar-user">
@@ -104,90 +99,61 @@ $pointage = $pointage->fetch();
             <div class="row g-4 mb-4">
                 <div class="col-md-4">
                     <div class="glass-card stat-card slide-up">
-                        <div class="stat-icon success"><i class="bi bi-clock-fill"></i></div>
+                        <div class="stat-icon primary"><i class="bi bi-calendar2-week-fill"></i></div>
                         <div class="stat-info">
-                            <div class="stat-label">Heures totales</div>
-                            <div class="stat-value"><?php echo number_format($stats['total'] ?? 0, 1); ?></div>
+                            <div class="stat-label">Total demandes</div>
+                            <div class="stat-value"><?php echo $totalConges; ?></div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="glass-card stat-card slide-up">
-                        <div class="stat-icon warning"><i class="bi bi-calendar-check"></i></div>
+                        <div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div>
                         <div class="stat-info">
-                            <div class="stat-label">Jours travaillés</div>
-                            <div class="stat-value"><?php echo $stats['jours'] ?? 0; ?></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="glass-card stat-card slide-up">
-                        <div class="stat-icon primary"><i class="bi bi-hourglass-split"></i></div>
-                        <div class="stat-info">
-                            <div class="stat-label">Congés en cours</div>
+                            <div class="stat-label">En attente</div>
                             <div class="stat-value"><?php echo $congesEnAttente; ?></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="glass-card stat-card slide-up">
+                        <div class="stat-icon success"><i class="bi bi-check-circle-fill"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Approuvés</div>
+                            <div class="stat-value"><?php echo $congesApprouves; ?></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-lg-5">
-                    <div class="glass-card slide-up">
-                        <div class="clock-display">
-                            <div class="time" id="bigClock">00:00:00</div>
-                            <div class="date" id="bigDate"></div>
-                        </div>
-                        <div class="clock-actions text-center mb-3">
-                            <?php if (!$pointage): ?>
-                                <a href="work-hours.php?action=clockin" class="btn-clock-in">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i>Pointer l'entrée
-                                </a>
-                            <?php elseif (!$pointage['clock_out']): ?>
-                                <a href="work-hours.php?action=clockout" class="btn-clock-out">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Pointer la sortie
-                                </a>
-                                <div class="mt-2 text-muted">
-                                    <small>Entrée à <?php echo $pointage['clock_in']; ?></small>
-                                </div>
-                            <?php else: ?>
-                                <div class="text-success">
-                                    <i class="bi bi-check-circle-fill"></i> Journée terminée
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+            <div class="glass-card data-table-wrapper slide-up">
+                <div class="data-table-header">
+                    <h5><i class="bi bi-calendar-check me-2" style="color:var(--accent);"></i>Mes derniers congés</h5>
+                    <a href="leaves.php" class="btn btn-outline-custom btn-sm">Voir tout</a>
                 </div>
-
-                <div class="col-lg-7">
-                    <div class="glass-card data-table-wrapper slide-up">
-                        <div class="data-table-header">
-                            <h5><i class="bi bi-calendar-check me-2" style="color:var(--accent);"></i>Mes derniers congés</h5>
-                            <a href="leaves.php" class="btn btn-outline-custom btn-sm">Voir tout</a>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table-dark-custom">
-                                <thead>
-                                    <tr><th>Type</th><th>Période</th><th>Statut</th></tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($mesConges as $conge): ?>
-                                    <tr>
-                                        <td><?php echo $conge['type']; ?></td>
-                                        <td><?php echo formatDate($conge['start_date']); ?> - <?php echo formatDate($conge['end_date']); ?></td>
-                                        <td><?php echo getStatusBadge($conge['status']); ?></td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table-dark-custom">
+                        <thead>
+                            <tr><th>Type</th><th>Période</th><th>Jours</th><th>Statut</th></tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($mesConges as $conge): ?>
+                            <tr>
+                                <td><?php echo $conge['type']; ?></td>
+                                <td><?php echo formatDate($conge['start_date']); ?> - <?php echo formatDate($conge['end_date']); ?></td>
+                                <td><?php echo $conge['days']; ?> j</td>
+                                <td><?php echo getStatusBadge($conge['status']); ?></td>
+                            </tr>
+                            <?php
+endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- BOUTON DE DÉCONNEXION FLOTTANT - SOLUTION 100% FONCTIONNELLE -->
+    <!-- BOUTON DE DÉCONNEXION FLOTTANT -->
     <a href="../../backend/logout.php" 
        class="btn btn-danger position-fixed" 
        style="bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; 
@@ -206,10 +172,6 @@ $pointage = $pointage->fetch();
             const now = new Date();
             document.getElementById('empTime').textContent = now.toLocaleTimeString('fr-FR');
             document.getElementById('empDate').textContent = now.toLocaleDateString('fr-FR', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-            });
-            document.getElementById('bigClock').textContent = now.toLocaleTimeString('fr-FR');
-            document.getElementById('bigDate').textContent = now.toLocaleDateString('fr-FR', { 
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
             });
         }

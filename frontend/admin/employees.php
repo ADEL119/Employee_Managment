@@ -125,8 +125,6 @@ unset($_SESSION['success'], $_SESSION['error']);
             <a href="employees.php" class="nav-link active"><i class="bi bi-people"></i><span>Employés</span></a>
             <div class="nav-section-title">Gestion</div>
             <a href="leaves.php" class="nav-link"><i class="bi bi-calendar-check"></i><span>Congés</span></a>
-            <a href="work-hours.php" class="nav-link"><i class="bi bi-clock-history"></i><span>Heures de travail</span></a>
-            <a href="reports.php" class="nav-link"><i class="bi bi-bar-chart-line"></i><span>Rapports</span></a>
         </nav>
         <div class="sidebar-user">
             <div class="user-avatar">AD</div>
