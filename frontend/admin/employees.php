@@ -15,30 +15,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $position = $_POST['position'] ?? '';
             $phone = $_POST['phone'] ?? '';
             $join_date = $_POST['join_date'] ?? date('Y-m-d');
-            
+
             // Vérifier si l'email existe déjà
             $check = $pdo->prepare("SELECT id FROM employees WHERE email = ?");
             $check->execute([$email]);
-            
+
             if ($check->rowCount() == 0) {
                 // Créer d'abord un utilisateur
                 $password = password_hash('password123', PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare("INSERT INTO users (email, password, role) VALUES (?, ?, 'employee')");
                 $stmt->execute([$email, $password]);
                 $user_id = $pdo->lastInsertId();
-                
+
                 // Ajouter l'employé
                 $stmt = $pdo->prepare("INSERT INTO employees (user_id, name, email, department, position, phone, join_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'active')");
                 $stmt->execute([$user_id, $name, $email, $department, $position, $phone, $join_date]);
-                
+
                 $_SESSION['success'] = "Employé ajouté avec succès";
-            } else {
+            }
+            else {
                 $_SESSION['error'] = "Cet email existe déjà";
             }
             header('Location: employees.php');
             exit();
         }
-        
+
         // Modification d'un employé
         if ($_POST['action'] === 'edit') {
             $id = $_POST['id'] ?? 0;
@@ -49,10 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $phone = $_POST['phone'] ?? '';
             $join_date = $_POST['join_date'] ?? '';
             $status = $_POST['status'] ?? 'active';
-            
+
             $stmt = $pdo->prepare("UPDATE employees SET name=?, email=?, department=?, position=?, phone=?, join_date=?, status=? WHERE id=?");
             $stmt->execute([$name, $email, $department, $position, $phone, $join_date, $status, $id]);
-            
+
             $_SESSION['success'] = "Employé modifié avec succès";
             header('Location: employees.php');
             exit();
@@ -63,22 +64,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Suppression d'un employé
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
-    
+
     // Récupérer l'user_id avant de supprimer
     $stmt = $pdo->prepare("SELECT user_id FROM employees WHERE id = ?");
     $stmt->execute([$id]);
     $emp = $stmt->fetch();
-    
+
     if ($emp) {
         // Supprimer l'employé (la suppression de l'user se fera par CASCADE)
         $stmt = $pdo->prepare("DELETE FROM employees WHERE id = ?");
         $stmt->execute([$id]);
-        
+
         // Supprimer l'utilisateur associé
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
         $stmt->execute([$emp['user_id']]);
     }
-    
+
     $_SESSION['success'] = "Employé supprimé avec succès";
     header('Location: employees.php');
     exit();
@@ -151,14 +152,16 @@ unset($_SESSION['success'], $_SESSION['error']);
                 <?php echo $success; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <?php endif; ?>
+            <?php
+endif; ?>
             
             <?php if ($error): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <?php echo $error; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <?php endif; ?>
+            <?php
+endif; ?>
 
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
                 <div class="search-box">
@@ -218,7 +221,8 @@ unset($_SESSION['success'], $_SESSION['error']);
                                     </div>
                                 </td>
                             </tr>
-                            <?php endforeach; ?>
+                            <?php
+endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -314,8 +318,12 @@ unset($_SESSION['success'], $_SESSION['error']);
             document.getElementById('empCount').textContent = count + ' employé(s)';
         });
 
+        // Flag pour savoir si on est en mode édition
+        let isEditing = false;
+
         // Édition d'un employé
         function editEmployee(emp) {
+            isEditing = true;
             document.getElementById('modalTitle').textContent = 'Modifier l\'employé';
             document.getElementById('formAction').value = 'edit';
             document.getElementById('empId').value = emp.id;
@@ -331,15 +339,20 @@ unset($_SESSION['success'], $_SESSION['error']);
             new bootstrap.Modal(document.getElementById('employeeModal')).show();
         }
 
-        // Réinitialisation du modal d'ajout
-        document.getElementById('employeeModal').addEventListener('show.bs.modal', function(event) {
-            if (!event.relatedTarget) {
+        // Réinitialisation du modal d'ajout (uniquement si pas en mode édition)
+        document.getElementById('employeeModal').addEventListener('show.bs.modal', function() {
+            if (!isEditing) {
                 document.getElementById('modalTitle').textContent = 'Ajouter un employé';
                 document.getElementById('formAction').value = 'add';
                 document.getElementById('empId').value = '';
                 document.getElementById('employeeForm').reset();
                 document.getElementById('statusField').style.display = 'none';
             }
+        });
+
+        // Réinitialiser le flag après fermeture du modal
+        document.getElementById('employeeModal').addEventListener('hidden.bs.modal', function() {
+            isEditing = false;
         });
     </script>
     <!-- BOUTON DE DÉCONNEXION FLOTTANT - SOLUTION 100% FONCTIONNELLE -->
