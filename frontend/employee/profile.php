@@ -52,6 +52,7 @@ $leaveStats = $leavesCount->fetch();
             <a href="dashboard.php" class="nav-link"><i class="bi bi-grid-1x2-fill"></i><span>Tableau de bord</span></a>
             <a href="profile.php" class="nav-link active"><i class="bi bi-person-circle"></i><span>Mon Profil</span></a>
             <a href="leaves.php" class="nav-link"><i class="bi bi-calendar-check"></i><span>Mes Congés</span></a>
+            <a href="work-hours.php" class="nav-link"><i class="bi bi-clock-history"></i><span>Mes Heures</span></a>
         </nav>
         <div class="sidebar-user">
             <div class="user-avatar"><?php echo getInitials($employee['name']); ?></div>

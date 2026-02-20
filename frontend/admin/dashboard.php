@@ -49,6 +49,7 @@ $recentLeaves = $pdo->query("SELECT l.*, e.name as employee_name
             
             <div class="nav-section-title">Gestion</div>
             <a href="leaves.php" class="nav-link"><i class="bi bi-calendar-check"></i><span>Congés</span></a>
+            <a href="work-hours.php" class="nav-link"><i class="bi bi-clock-history"></i><span>Heures de travail</span></a>
         </nav>
         
         <div class="sidebar-user">
